@@ -1,0 +1,80 @@
+name: Xcode cache
+description: Restores or saves Xcode build products, SwiftPM checkouts, and source mtimes.
+
+inputs:
+  operation:
+    description: Whether to restore or save caches.
+    required: true
+  derived-data-path:
+    description: Directory passed to xcodebuild -derivedDataPath.
+    required: true
+  source-packages-path:
+    description: Directory passed to xcodebuild -clonedSourcePackagesDirPath.
+    required: true
+  derived-data-key:
+    description: Primary cache key for DerivedData.
+    required: true
+  derived-data-restore-keys:
+    description: Restore-key prefixes for DerivedData.
+    required: false
+    default: ''
+  source-packages-key:
+    description: Primary cache key for SwiftPM checkouts.
+    required: true
+  mtime-targets:
+    description: Additional newline-separated glob patterns whose mtimes should be preserved.
+    required: false
+    default: ''
+
+outputs:
+  derived-data-cache-hit:
+    description: Restored DerivedData cache key, if any.
+    value: ${{ steps.restore-derived-data.outputs.cache-matched-key }}
+  source-packages-cache-hit:
+    description: Restored SwiftPM cache key, if any.
+    value: ${{ steps.restore-source-packages.outputs.cache-matched-key }}
+
+runs:
+  using: composite
+  steps:
+    - name: Restore DerivedData
+      id: restore-derived-data
+      if: inputs.operation == 'restore'
+      uses: actions/cache/restore@v4
+      with:
+        path: ${{ inputs.derived-data-path }}
+        key: ${{ inputs.derived-data-key }}
+        restore-keys: ${{ inputs.derived-data-restore-keys }}
+    - name: Restore SwiftPM checkouts
+      id: restore-source-packages
+      if: inputs.operation == 'restore'
+      uses: actions/cache/restore@v4
+      with:
+        path: ${{ inputs.source-packages-path }}
+        key: ${{ inputs.source-packages-key }}
+    - name: Restore source mtimes
+      if: inputs.operation == 'restore' && steps.restore-derived-data.outputs.cache-matched-key != ''
+      shell: bash
+      env:
+        DERIVED_DATA_PATH: ${{ inputs.derived-data-path }}
+      run: ruby "$GITHUB_ACTION_PATH/restore-mtimes.rb"
+    - name: Store source mtimes
+      if: inputs.operation == 'save'
+      shell: bash
+      env:
+        DERIVED_DATA_PATH: ${{ inputs.derived-data-path }}
+        SOURCE_PACKAGES_PATH: ${{ inputs.source-packages-path }}
+        MTIME_TARGETS: ${{ inputs.mtime-targets }}
+      run: ruby "$GITHUB_ACTION_PATH/store-mtimes.rb"
+    - name: Save SwiftPM checkouts
+      if: inputs.operation == 'save'
+      uses: actions/cache/save@v4
+      with:
+        path: ${{ inputs.source-packages-path }}
+        key: ${{ inputs.source-packages-key }}
+    - name: Save DerivedData
+      if: inputs.operation == 'save'
+      uses: actions/cache/save@v4
+      with:
+        path: ${{ inputs.derived-data-path }}
+        key: ${{ inputs.derived-data-key }}
