@@ -40,7 +40,7 @@ runs:
     - name: Restore DerivedData
       id: restore-derived-data
       if: inputs.operation == 'restore'
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@v6
       with:
         path: ${{ inputs.derived-data-path }}
         key: ${{ inputs.derived-data-key }}
@@ -48,7 +48,7 @@ runs:
     - name: Restore SwiftPM checkouts
       id: restore-source-packages
       if: inputs.operation == 'restore'
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@v6
       with:
         path: ${{ inputs.source-packages-path }}
         key: ${{ inputs.source-packages-key }}
@@ -68,13 +68,13 @@ runs:
       run: ruby "$GITHUB_ACTION_PATH/store-mtimes.rb"
     - name: Save SwiftPM checkouts
       if: inputs.operation == 'save'
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@v6
       with:
         path: ${{ inputs.source-packages-path }}
         key: ${{ inputs.source-packages-key }}
     - name: Save DerivedData
       if: inputs.operation == 'save'
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@v6
       with:
         path: ${{ inputs.derived-data-path }}
         key: ${{ inputs.derived-data-key }}
