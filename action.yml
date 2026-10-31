@@ -57,7 +57,7 @@ runs:
       shell: bash
       env:
         DERIVED_DATA_PATH: ${{ inputs.derived-data-path }}
-      run: ruby "$GITHUB_ACTION_PATH/restore-mtimes.rb"
+      run: python3 "$GITHUB_ACTION_PATH/mtimes.py" restore
     - name: Store source mtimes
       if: inputs.operation == 'save'
       shell: bash
@@ -65,7 +65,7 @@ runs:
         DERIVED_DATA_PATH: ${{ inputs.derived-data-path }}
         SOURCE_PACKAGES_PATH: ${{ inputs.source-packages-path }}
         MTIME_TARGETS: ${{ inputs.mtime-targets }}
-      run: ruby "$GITHUB_ACTION_PATH/store-mtimes.rb"
+      run: python3 "$GITHUB_ACTION_PATH/mtimes.py" store
     - name: Save SwiftPM checkouts
       if: inputs.operation == 'save'
       uses: actions/cache/save@v6
