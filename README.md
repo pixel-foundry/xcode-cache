@@ -15,12 +15,3 @@ metadata remains compatible with caches written by the previous Ruby implementat
 and brace alternatives such as `App/**/*.{pbxproj,xcconfig}`. Recursive matching skips
 hidden directories and directory symlinks unless explicitly targeted. DerivedData and
 SwiftPM checkout directories are excluded from source metadata.
-
-Run the tests with:
-
-```sh
-python3 -B -m unittest discover -s tests -v
-```
-
-The tests include a metadata fixture produced by the original Ruby storage script to
-check compatibility in both directions.
